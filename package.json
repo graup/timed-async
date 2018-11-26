@@ -1,0 +1,21 @@
+{
+  "name": "timed-async",
+  "version": "0.1.0",
+  "description": "A simple helper to detect slow and fast async operations",
+  "main": "index.es5.js",
+  "module": "index.js",
+  "author": "Paul Grau <paul@graycoding.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "npm run lint && babel-node test.js",
+    "lint": "eslint --fix *.js",
+    "build": "babel index.js > index.es5.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.5",
+    "@babel/node": "^7.0.0",
+    "@babel/preset-env": "^7.1.5",
+    "eslint": "^5.9.0"
+  }
+}
