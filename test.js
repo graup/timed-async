@@ -141,6 +141,16 @@ async function test () {
         wasSlow: false,
         wasFast: false,
     });
+
+    // Test usage with promise instead of function
+    testResult = await testTimedAsync(someQuickTask(), 'quick');
+    console.log(testResult);
+    assertDeepEqual(testResult, {
+        result: 1,
+        wasError: false,
+        wasSlow: false,
+        wasFast: true,
+    });
 }
 
 test();
