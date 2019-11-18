@@ -77,7 +77,7 @@ function waitOrLoad(callbackIfSlow, maximumLoadTime = SLOW_LOAD_TIME) {
  * Decorator to add "slow" and "fast" timing hooks to any async operation.
  * This returns the return value of the main function and also lets exceptions go through.
  * 
- * @param {function} main execution function to be timed
+ * @param {function|Promise} main execution function to be timed, or promise to be awaited
  * @param {object} options
  * @param {function} options.slow function to be called when operation is slow
  * @param {number?} options.slowTime time after which the operation is considered slow. Default: 1500
@@ -96,7 +96,8 @@ async function timedAsync(main, options = {}) {
   }
 
   try {
-    return await main();
+    const promise = typeof main === 'function' ? main() : main;
+    return await promise;
   } finally {
     if (typeof loadingFinished !== 'undefined') {
       loadingFinished();
