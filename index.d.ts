@@ -1,8 +1,8 @@
 interface Options {
-    slow: () => void;
-    slowTime: number;
-    fast: () => void;
-    fastTime: number;
+    slow?: () => void;
+    slowTime?: number;
+    fast?: () => void;
+    fastTime?: number;
 }
 declare type Main<T> = Promise<T> | ((...args: any[]) => Promise<T>);
 /**
@@ -46,5 +46,5 @@ declare function waitOrLoad(callbackIfSlow: () => void, maximumLoadTime?: number
  * @param {number?} options.fastTime time until which the operation is considered fast. Default: 500
  * @return {any} return value of main function
  */
-declare function timedAsync<T>(main: Main<T>, options: Options): Promise<T>;
+declare function timedAsync<T>(main: Main<T>, options?: Options): Promise<T>;
 export { loadAndWait, waitOrLoad, timedAsync };

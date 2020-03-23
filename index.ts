@@ -1,9 +1,9 @@
 
 interface Options {
-    slow: () => void;
-    slowTime: number;
-    fast: () => void;
-    fastTime: number;
+    slow?: () => void;
+    slowTime?: number;
+    fast?: () => void;
+    fastTime?: number;
 }
 type Main<T> = Promise<T> | ((...args: any[]) => Promise<T>);
 
@@ -80,7 +80,7 @@ function waitOrLoad(callbackIfSlow: () => void, maximumLoadTime: number = SLOW_L
  * @param {number?} options.fastTime time until which the operation is considered fast. Default: 500
  * @return {any} return value of main function
  */
-async function timedAsync<T>(main: Main<T>, options: Options): Promise<T> {
+async function timedAsync<T>(main: Main<T>, options: Options = {}): Promise<T> {
     const waitMinimum = loadAndWait(options.fastTime || FAST_LOAD_TIME);
     let loadingFinished;
     if (typeof options.slow === 'function') {
@@ -93,7 +93,7 @@ async function timedAsync<T>(main: Main<T>, options: Options): Promise<T> {
         if (typeof loadingFinished !== 'undefined') {
             loadingFinished();
         }
-        await waitMinimum(options.fast);
+        await waitMinimum(options.fast || function(){});
     }
 }
 

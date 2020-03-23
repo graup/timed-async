@@ -87,7 +87,7 @@ function waitOrLoad(callbackIfSlow, maximumLoadTime = SLOW_LOAD_TIME) {
  */
 
 
-async function timedAsync(main, options) {
+async function timedAsync(main, options = {}) {
   const waitMinimum = loadAndWait(options.fastTime || FAST_LOAD_TIME);
   let loadingFinished;
 
@@ -103,7 +103,7 @@ async function timedAsync(main, options) {
       loadingFinished();
     }
 
-    await waitMinimum(options.fast);
+    await waitMinimum(options.fast || function () {});
   }
 }
 

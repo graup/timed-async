@@ -67,7 +67,7 @@ function waitOrLoad(callbackIfSlow, maximumLoadTime = SLOW_LOAD_TIME) {
  * @param {number?} options.fastTime time until which the operation is considered fast. Default: 500
  * @return {any} return value of main function
  */
-async function timedAsync(main, options) {
+async function timedAsync(main, options = {}) {
     const waitMinimum = loadAndWait(options.fastTime || FAST_LOAD_TIME);
     let loadingFinished;
     if (typeof options.slow === 'function') {
@@ -81,7 +81,7 @@ async function timedAsync(main, options) {
         if (typeof loadingFinished !== 'undefined') {
             loadingFinished();
         }
-        await waitMinimum(options.fast);
+        await waitMinimum(options.fast || function () { });
     }
 }
 export { loadAndWait, waitOrLoad, timedAsync };
