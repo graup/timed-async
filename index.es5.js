@@ -35,7 +35,7 @@ function loadAndWait(minimumLoadTime = FAST_LOAD_TIME) {
 
   return function waitMinimum(callbackIfFast) {
     return new Promise(resolve => {
-      const loadDuration = new Date() - startedLoading;
+      const loadDuration = +new Date() - startedLoading;
       const waitTime = clamp(minimumLoadTime - loadDuration, 0, minimumLoadTime);
 
       if (waitTime > 0 && typeof callbackIfFast === 'function') {
@@ -87,7 +87,7 @@ function waitOrLoad(callbackIfSlow, maximumLoadTime = SLOW_LOAD_TIME) {
  */
 
 
-async function timedAsync(main, options = {}) {
+async function timedAsync(main, options) {
   const waitMinimum = loadAndWait(options.fastTime || FAST_LOAD_TIME);
   let loadingFinished;
 

@@ -5,7 +5,12 @@ module.exports = {
         "node": true,
         "mocha": true,
     },
-    "extends": "eslint:recommended",
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint"],
+    "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "eslint:recommended",
+    ],
     "parserOptions": {
         "ecmaVersion": 2018,
         "sourceType": "module"
@@ -37,6 +42,7 @@ module.exports = {
         "prefer-arrow-callback": "warn",
         "prefer-const": "warn",
         "no-var": "error",
-        "no-unused-vars": "warn"
+        "no-unused-vars": "warn",
+        "@typescript-eslint/no-explicit-any": "off"
     }
 };

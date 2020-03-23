@@ -1,29 +1,40 @@
+
+interface Options {
+    slow: () => void;
+    slowTime: number;
+    fast: () => void;
+    fastTime: number;
+}
+type Main<T> = Promise<T> | ((...args: any[]) => Promise<T>);
+
 const FAST_LOAD_TIME = 500; // miliseconds
 const SLOW_LOAD_TIME = 1500; // miliseconds
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+const clamp = (num: number, min: number, max: number): number => Math.min(Math.max(num, min), max);
+
 /**
  * Wait a minimum amount of time, even when an operation (such as an API response) finished very quickly.
  * Also good for testing, as production load times are usually slower than
  * in a development environment.
- *
+ * 
  * Example:
  *     const waitMinimum = loadAndWait();
  *     (... do something that the user expects to take some time, e.g. loading data ...)
  *     await waitMinimum();
- *
+ * 
  * @param {number} minimumLoadTime duration in ms, default 500
  * @return {loadAndWait~waitMinimum}
  */
-function loadAndWait(minimumLoadTime = FAST_LOAD_TIME) {
-    const startedLoading = +new Date();
+function loadAndWait(minimumLoadTime: number = FAST_LOAD_TIME): ((callbackIfFast: () => void) => Promise<void>) {
+    const startedLoading = + new Date();
     /**
      * @param {function} callbackIfFast function to call if operation finished in less than minimumLoadTime.
      * @return {Promise} promise that resolves when minimumLoadTime minus wait time has passed (possibly immediately).
      */
-    return function waitMinimum(callbackIfFast) {
+    return function waitMinimum(callbackIfFast): Promise<void> {
         return new Promise(resolve => {
-            const loadDuration = +new Date() - startedLoading;
-            const waitTime = clamp(minimumLoadTime - loadDuration, 0, minimumLoadTime);
+            const loadDuration = + new Date() - startedLoading;
+            const waitTime = clamp(minimumLoadTime-loadDuration, 0, minimumLoadTime);
             if (waitTime > 0 && typeof callbackIfFast === 'function') {
                 callbackIfFast();
             }
@@ -31,34 +42,36 @@ function loadAndWait(minimumLoadTime = FAST_LOAD_TIME) {
         });
     };
 }
+
 /**
  * Register a function to be called when an operation is considered slow.
- *
+ * 
  * Example:
  *     const loadingFinished = waitOrLoad(() => {
- *         console.log('loading is slow');
+ *         console.log('loading is slow'); 
  *     });
  *     (... do something that the user expects to take some time, e.g. loading data ...)
  *     loadingFinished();
- *
+ * 
  * @param {function} callbackIfSlow function to call when operation is taking longer than maximumLoadTime.
  * @param {number} maximumLoadTime duration in ms, default 1500
- * @return {waitOrLoad~loadingFinished}
+ * @return {waitOrLoad~loadingFinished} 
  */
-function waitOrLoad(callbackIfSlow, maximumLoadTime = SLOW_LOAD_TIME) {
+function waitOrLoad(callbackIfSlow: () => void, maximumLoadTime: number = SLOW_LOAD_TIME): () => void {
     const timeout = setTimeout(callbackIfSlow, maximumLoadTime);
     /**
      * Call this function after the operation has finished.
-     * This cancels the timeout so that the previously registered, not yet executed callback is not called.
+     * This cancels the timeout so that the previously registered, not yet executed callback is not called. 
      */
-    return function loadingFinished() {
+    return function loadingFinished(): void {
         clearTimeout(timeout);
     };
 }
+
 /**
  * Decorator to add "slow" and "fast" timing hooks to any async operation.
  * This returns the return value of the main function and also lets exceptions go through.
- *
+ * 
  * @param {function|Promise} main execution function to be timed, or promise to be awaited
  * @param {object} options
  * @param {function} options.slow function to be called when operation is slow
@@ -67,7 +80,7 @@ function waitOrLoad(callbackIfSlow, maximumLoadTime = SLOW_LOAD_TIME) {
  * @param {number?} options.fastTime time until which the operation is considered fast. Default: 500
  * @return {any} return value of main function
  */
-async function timedAsync(main, options) {
+async function timedAsync<T>(main: Main<T>, options: Options): Promise<T> {
     const waitMinimum = loadAndWait(options.fastTime || FAST_LOAD_TIME);
     let loadingFinished;
     if (typeof options.slow === 'function') {
@@ -76,13 +89,16 @@ async function timedAsync(main, options) {
     try {
         const promise = typeof main === 'function' ? main() : main;
         return await promise;
-    }
-    finally {
+    } finally {
         if (typeof loadingFinished !== 'undefined') {
             loadingFinished();
         }
         await waitMinimum(options.fast);
     }
 }
-export { loadAndWait, waitOrLoad, timedAsync };
-//# sourceMappingURL=index.js.map
+
+export {
+    loadAndWait,
+    waitOrLoad,
+    timedAsync
+};
