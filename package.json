@@ -1,6 +1,6 @@
 {
   "name": "timed-async",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A simple helper to detect slow and fast async operations",
   "main": "index.es5.js",
   "module": "index.js",
