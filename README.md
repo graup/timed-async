@@ -10,15 +10,15 @@ This helper lets you react to these timings:
 
     Started         Finished quickly     Minimum time passed
        |                   |                     |
-    --------------------------------------------------------
+    --------------------------------------------------------------
                            | 
                  Fast operation detected
     
-    Started                    Finished slowly
-       |                              |
-    ------------------------------------------
-                           |
-                 Slow operation detected
+    Started                                        Finished slowly
+       |                                                  |
+    --------------------------------------------------------------
+                                                      |
+                                          Slow operation detected
 
 It also properly handles exceptions and return values.
 
