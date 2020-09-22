@@ -5,10 +5,7 @@ module.exports = {
         "node": true,
         "mocha": true,
     },
-    "parser": "@typescript-eslint/parser",
-    "plugins": ["@typescript-eslint"],
     "extends": [
-        "plugin:@typescript-eslint/recommended",
         "eslint:recommended",
     ],
     "parserOptions": {
@@ -21,7 +18,7 @@ module.exports = {
         ],
         "indent": [
             "error",
-            4
+            2
         ],
         "linebreak-style": [
             "error",
@@ -43,6 +40,15 @@ module.exports = {
         "prefer-const": "warn",
         "no-var": "error",
         "no-unused-vars": "warn",
-        "@typescript-eslint/no-explicit-any": "off"
-    }
+        
+    },
+    "overrides": [
+        {
+            "files": ["*.ts"],
+            "parser": "@typescript-eslint/parser",
+            "plugins": ["@typescript-eslint"],
+            "extends": ["plugin:@typescript-eslint/recommended"],
+            "rules": {"@typescript-eslint/no-explicit-any": "off"}
+        }
+    ]
 };

@@ -1,6 +1,6 @@
 {
   "name": "timed-async",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "description": "A simple helper to detect slow and fast async operations",
   "main": "index.es5.js",
   "module": "index.js",
@@ -8,7 +8,7 @@
   "author": "Paul Grau <paul@graycoding.com>",
   "license": "MIT",
   "scripts": {
-    "test": "npm run lint && babel-node test.js",
+    "test": "npm run lint && babel-node --trace-warnings --unhandled-rejections=strict test.js",
     "lint": "eslint --fix index.ts",
     "build": "tsc --project tsconfig.json && babel index.ts > index.es5.js"
   },
@@ -20,7 +20,7 @@
     "@babel/preset-typescript": "^7.9.0",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",
-    "eslint": "^5.9.0",
+    "eslint": "^7.8.1",
     "typescript": "^3.8.3"
   }
 }
