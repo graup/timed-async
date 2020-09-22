@@ -1,44 +1,59 @@
+declare type Main<T> = Promise<T> | ((...args: any[]) => Promise<T>);
+declare type CallbackFunc = (time: number) => void;
+/**
+ * A promise that is only resolved after a minimum amount of time has passed.
+ * Can also attach slow and fast callbacks.
+ */
+declare class DelayedPromise<T> extends Promise<T> {
+    startedLoading: number;
+    minimumDelay: number;
+    slowCallbackTimeouts: number[];
+    fastCallbacks: CallbackFunc[];
+    /**
+     * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
+     * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned.
+     */
+    constructor(promiseOrFunc: Main<T>, minimumDelay?: number);
+    private execute;
+    static get [Symbol.species](): PromiseConstructor;
+    get [Symbol.toStringTag](): string;
+    /**
+     * Adds callback to be called in case execution was faster than the minimum delay.
+     * Can be chained.
+     * @param time
+     * @param callback
+     */
+    onFast(callback: CallbackFunc): this;
+    private executeFastCallbacks;
+    /**
+     * Adds callback to be called after time passed.
+     * Callback gets cleared and is not executed if promise resolves before that.
+     * This can be used to display text such as "Still loading, please wait a bit more."
+     * Can be chained.
+     * @param time time (in ms) after which this callback is executed
+     * @param callback
+     */
+    after(time: number, callback: CallbackFunc): this;
+    private clearSlowCallbacks;
+}
+/**
+ * Factory to create a DelayedPromise.
+ * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
+ * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned.
+ */
+declare const ensureDelay: <T>(promiseOrFunc: Main<T>, minimumDelay?: number) => DelayedPromise<T>;
 interface Options {
-    slow?: () => void;
+    slow?: CallbackFunc;
     slowTime?: number;
-    fast?: () => void;
+    fast?: CallbackFunc;
     fastTime?: number;
 }
-declare type Main<T> = Promise<T> | ((...args: any[]) => Promise<T>);
-/**
- * Wait a minimum amount of time, even when an operation (such as an API response) finished very quickly.
- * Also good for testing, as production load times are usually slower than
- * in a development environment.
- *
- * Example:
- *     const waitMinimum = loadAndWait();
- *     (... do something that the user expects to take some time, e.g. loading data ...)
- *     await waitMinimum();
- *
- * @param {number} minimumLoadTime duration in ms, default 500
- * @return {loadAndWait~waitMinimum}
- */
-declare function loadAndWait(minimumLoadTime?: number): ((callbackIfFast: () => void) => Promise<void>);
-/**
- * Register a function to be called when an operation is considered slow.
- *
- * Example:
- *     const loadingFinished = waitOrLoad(() => {
- *         console.log('loading is slow');
- *     });
- *     (... do something that the user expects to take some time, e.g. loading data ...)
- *     loadingFinished();
- *
- * @param {function} callbackIfSlow function to call when operation is taking longer than maximumLoadTime.
- * @param {number} maximumLoadTime duration in ms, default 1500
- * @return {waitOrLoad~loadingFinished}
- */
-declare function waitOrLoad(callbackIfSlow: () => void, maximumLoadTime?: number): () => void;
 /**
  * Decorator to add "slow" and "fast" timing hooks to any async operation.
  * This returns the return value of the main function and also lets exceptions go through.
+ * This is the legacy version of ensureDelay supported for backwards compatability.
  *
- * @param {function|Promise} main execution function to be timed, or promise to be awaited
+ * @param {function|Promise} promiseOrFunc execution function to be timed, or promise to be awaited
  * @param {object} options
  * @param {function} options.slow function to be called when operation is slow
  * @param {number?} options.slowTime time after which the operation is considered slow. Default: 1500
@@ -46,5 +61,5 @@ declare function waitOrLoad(callbackIfSlow: () => void, maximumLoadTime?: number
  * @param {number?} options.fastTime time until which the operation is considered fast. Default: 500
  * @return {any} return value of main function
  */
-declare function timedAsync<T>(main: Main<T>, options?: Options): Promise<T>;
-export { loadAndWait, waitOrLoad, timedAsync };
+declare function timedAsync<T>(promiseOrFunc: Main<T>, options?: Options): DelayedPromise<T>;
+export { DelayedPromise, ensureDelay, timedAsync, };
