@@ -12,13 +12,13 @@ This helper lets you react to these timings:
 
     Started         Finished quickly     Minimum time passed
        |                   |                     |
-    --------------------------------------------------------------
+       ------------------------------------------- Resolved
                            | 
                  Fast operation detected
     
     Started                                        Finished slowly
        |                                                  |
-    --------------------------------------------------------------
+       ---------------------------------------------------- Resolved
                                                       |
                                           Slow operation detected
 
