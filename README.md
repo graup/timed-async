@@ -70,12 +70,14 @@ async function load() {
 ## Suggested minimum delay times
 
 - Simple offline interactions: no delay
-- Complex offline interactions (like opening a window): 0-500ms
+- Complex offline interactions (like opening a window): 100-500ms
   - Make sure this is actually perceived as complex. Don't add delays for no good reason!
 - Simple online interactions (like fetching or saving data): 500-1000ms
 - Complex online interactions (like running some analysis): 1000-1500ms
 
-Anything larger than 500ms should be accompanied by a loading indicator (e.g. spinning circle).
+Anything larger than 1 or 2s should definitely be accompanied by a loading indicator (e.g. spinning circle).
+
+Reference: [Response Times: The 3 Important Limits](https://www.nngroup.com/articles/response-times-3-important-limits/)
 
 ## Contact
 
