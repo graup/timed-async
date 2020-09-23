@@ -71,6 +71,7 @@ async function load() {
 
 - Simple offline interactions: no delay
 - Complex offline interactions (like opening a window): 0-500ms
+  - Make sure this is actually perceived as complex. Don't add delays for no good reason!
 - Simple online interactions (like fetching or saving data): 500-1000ms
 - Complex online interactions (like running some analysis): 1000-1500ms
 
