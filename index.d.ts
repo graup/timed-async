@@ -11,7 +11,7 @@ declare class DelayedPromise<T> extends Promise<T> {
     fastCallbacks: CallbackFunc[];
     /**
      * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
-     * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned.
+     * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned (default: 500).
      */
     constructor(promiseOrFunc: Main<T>, minimumDelay?: number);
     private execute;
@@ -39,7 +39,7 @@ declare class DelayedPromise<T> extends Promise<T> {
 /**
  * Factory to create a DelayedPromise.
  * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
- * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned.
+ * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned (default: 500).
  */
 declare const ensureDelay: <T>(promiseOrFunc: Main<T>, minimumDelay?: number) => DelayedPromise<T>;
 interface Options {

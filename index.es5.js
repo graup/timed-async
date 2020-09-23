@@ -28,7 +28,7 @@ class DelayedPromise extends Promise {
   fastCallbacks = [];
   /**
    * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
-   * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned.
+   * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned (default: 500).
    */
 
   constructor(promiseOrFunc, minimumDelay = FAST_LOAD_TIME) {
@@ -111,7 +111,7 @@ class DelayedPromise extends Promise {
 /**
  * Factory to create a DelayedPromise.
  * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
- * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned.
+ * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned (default: 500).
  */
 
 
