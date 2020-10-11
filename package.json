@@ -6,6 +6,7 @@
   "module": "index.js",
   "types": "index.d.ts",
   "author": "Paul Grau <paul@graycoding.com>",
+  "homepage": "https://github.com/graup/timed-async",
   "license": "MIT",
   "scripts": {
     "test": "npm run lint && babel-node --trace-warnings --unhandled-rejections=strict test.js",
