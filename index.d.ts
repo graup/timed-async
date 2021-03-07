@@ -1,14 +1,16 @@
 declare type Main<T> = Promise<T> | ((...args: any[]) => Promise<T>);
 declare type CallbackFunc = (time: number) => void;
+export declare const sleep: (time: number) => Promise<void>;
 /**
  * A promise that is only resolved after a minimum amount of time has passed.
  * Can also attach slow and fast callbacks.
  */
-declare class DelayedPromise<T> extends Promise<T> {
+export declare class DelayedPromise<T> extends Promise<T> {
     startedLoading: number;
     minimumDelay: number;
     slowCallbackTimeouts: number[];
     fastCallbacks: CallbackFunc[];
+    resolvedCallbacks: CallbackFunc[];
     /**
      * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
      * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned (default: 500).
@@ -17,14 +19,13 @@ declare class DelayedPromise<T> extends Promise<T> {
     private execute;
     static get [Symbol.species](): PromiseConstructor;
     get [Symbol.toStringTag](): string;
+    private executeCallbacks;
     /**
-     * Adds callback to be called in case execution was faster than the minimum delay.
+     * Adds callback to be called in case original promise settled faster than the minimum delay.
      * Can be chained.
-     * @param time
      * @param callback
      */
     onFast(callback: CallbackFunc): this;
-    private executeFastCallbacks;
     /**
      * Adds callback to be called after time passed.
      * Callback gets cleared and is not executed if promise resolves before that.
@@ -41,7 +42,12 @@ declare class DelayedPromise<T> extends Promise<T> {
  * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
  * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned (default: 500).
  */
-declare const ensureDelay: <T>(promiseOrFunc: Main<T>, minimumDelay?: number) => DelayedPromise<T>;
+export declare function ensureDelay<T>(promiseOrFunc: Main<T>, minimumDelay?: number): DelayedPromise<T>;
+/**
+ * Annotate promise result with duration.
+ * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
+ */
+export declare function time<T>(promiseOrFunc: Main<T>): Promise<[T, number]>;
 interface Options {
     slow?: CallbackFunc;
     slowTime?: number;
@@ -61,5 +67,5 @@ interface Options {
  * @param {number?} options.fastTime time until which the operation is considered fast. Default: 500
  * @return {any} return value of main function
  */
-declare function timedAsync<T>(promiseOrFunc: Main<T>, options?: Options): DelayedPromise<T>;
-export { DelayedPromise, ensureDelay, timedAsync, };
+export declare function timedAsync<T>(promiseOrFunc: Main<T>, options?: Options): DelayedPromise<T>;
+export {};

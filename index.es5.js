@@ -3,8 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.ensureDelay = ensureDelay;
+exports.time = time;
 exports.timedAsync = timedAsync;
-exports.ensureDelay = exports.DelayedPromise = void 0;
+exports.DelayedPromise = exports.sleep = void 0;
 const FAST_LOAD_TIME = 500; // miliseconds
 
 const SLOW_LOAD_TIME = 1500; // miliseconds
@@ -22,10 +24,13 @@ const sleep = time => new Promise(resolve => setTimeout(resolve, time));
  */
 
 
+exports.sleep = sleep;
+
 class DelayedPromise extends Promise {
   minimumDelay = FAST_LOAD_TIME;
   slowCallbackTimeouts = [];
   fastCallbacks = [];
+  resolvedCallbacks = [];
   /**
    * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
    * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned (default: 500).
@@ -34,7 +39,7 @@ class DelayedPromise extends Promise {
   constructor(promiseOrFunc, minimumDelay = FAST_LOAD_TIME) {
     super((resolve, reject) => {
       setTimeout(() => {
-        // nextTick because this isn't available yet
+        // nextTick because `this` isn't available yet
         this.execute(promiseOrFunc).then(resolve).catch(reject);
       });
     });
@@ -50,7 +55,7 @@ class DelayedPromise extends Promise {
       const extraWaitTime = clamp(this.minimumDelay - loadDuration, 0, this.minimumDelay);
 
       if (extraWaitTime > 0) {
-        this.executeFastCallbacks(loadDuration);
+        this.executeCallbacks(this.fastCallbacks, loadDuration);
       }
 
       await sleep(extraWaitTime);
@@ -65,10 +70,15 @@ class DelayedPromise extends Promise {
   get [Symbol.toStringTag]() {
     return 'DelayedPromise';
   }
+
+  executeCallbacks(callbacks, time) {
+    for (const callback of callbacks) {
+      callback(time);
+    }
+  }
   /**
-   * Adds callback to be called in case execution was faster than the minimum delay.
+   * Adds callback to be called in case original promise settled faster than the minimum delay.
    * Can be chained.
-   * @param time 
    * @param callback 
    */
 
@@ -76,12 +86,6 @@ class DelayedPromise extends Promise {
   onFast(callback) {
     this.fastCallbacks.push(callback);
     return this;
-  }
-
-  executeFastCallbacks(time) {
-    for (const callback of this.fastCallbacks) {
-      callback(time);
-    }
   }
   /**
    * Adds callback to be called after time passed.
@@ -117,11 +121,21 @@ class DelayedPromise extends Promise {
 
 exports.DelayedPromise = DelayedPromise;
 
-const ensureDelay = (promiseOrFunc, minimumDelay = FAST_LOAD_TIME) => {
+function ensureDelay(promiseOrFunc, minimumDelay = FAST_LOAD_TIME) {
   return new DelayedPromise(promiseOrFunc, minimumDelay);
-};
+}
+/**
+ * Annotate promise result with duration.
+ * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
+ */
 
-exports.ensureDelay = ensureDelay;
+
+async function time(promiseOrFunc) {
+  const startedLoading = +new Date();
+  const result = await promiseOrCall(promiseOrFunc);
+  const time = +new Date() - startedLoading;
+  return [result, time];
+}
 
 /**
  * Decorator to add "slow" and "fast" timing hooks to any async operation.
