@@ -10,17 +10,18 @@ const promiseOrCall = <T>(promiseOrFunc: Main<T>): Promise<T> => {
   return typeof promiseOrFunc === 'function' ? promiseOrFunc() : promiseOrFunc;
 };
 
-const sleep = (time: number): Promise<void> => new Promise(resolve => setTimeout(resolve, time));
+export const sleep = (time: number): Promise<void> => new Promise(resolve => setTimeout(resolve, time));
 
 /**
  * A promise that is only resolved after a minimum amount of time has passed.
  * Can also attach slow and fast callbacks.
  */
-class DelayedPromise<T> extends Promise<T> {
+export class DelayedPromise<T> extends Promise<T> {
   startedLoading: number;
   minimumDelay: number = FAST_LOAD_TIME;
   slowCallbackTimeouts: number[] = [];
   fastCallbacks: CallbackFunc[] = [];
+  resolvedCallbacks: CallbackFunc[] = [];
 
   /**
    * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
@@ -28,7 +29,7 @@ class DelayedPromise<T> extends Promise<T> {
    */
   constructor(promiseOrFunc: Main<T>, minimumDelay = FAST_LOAD_TIME) {
     super((resolve, reject) => {
-      setTimeout(() => { // nextTick because this isn't available yet
+      setTimeout(() => { // nextTick because `this` isn't available yet
         this.execute(promiseOrFunc).then(resolve).catch(reject);
       });
     });
@@ -43,7 +44,7 @@ class DelayedPromise<T> extends Promise<T> {
       const loadDuration = + new Date() - this.startedLoading;
       const extraWaitTime = clamp(this.minimumDelay-loadDuration, 0, this.minimumDelay);
       if (extraWaitTime > 0) {
-        this.executeFastCallbacks(loadDuration);
+        this.executeCallbacks(this.fastCallbacks, loadDuration);
       }
       await sleep(extraWaitTime);
       this.clearSlowCallbacks();
@@ -58,21 +59,20 @@ class DelayedPromise<T> extends Promise<T> {
     return 'DelayedPromise';
   }
 
+  private executeCallbacks(callbacks: CallbackFunc[], time: number): void {
+    for (const callback of callbacks) {
+      callback(time);
+    }
+  }
+
   /**
-   * Adds callback to be called in case execution was faster than the minimum delay.
+   * Adds callback to be called in case original promise settled faster than the minimum delay.
    * Can be chained.
-   * @param time 
    * @param callback 
    */
   onFast(callback: CallbackFunc): this {
     this.fastCallbacks.push(callback);
     return this;
-  }
-
-  private executeFastCallbacks(time: number): void {
-    for (const callback of this.fastCallbacks) {
-      callback(time);
-    }
   }
 
   /**
@@ -103,10 +103,20 @@ class DelayedPromise<T> extends Promise<T> {
  * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
  * @param minimumDelay minimum amount of time (in ms) to have passed before promise is returned (default: 500).
  */
-const ensureDelay = <T>(promiseOrFunc: Main<T>, minimumDelay = FAST_LOAD_TIME): DelayedPromise<T> => {
+export function ensureDelay<T>(promiseOrFunc: Main<T>, minimumDelay = FAST_LOAD_TIME): DelayedPromise<T> {
   return new DelayedPromise(promiseOrFunc, minimumDelay);
-};
+}
 
+/**
+ * Annotate promise result with duration.
+ * @param promiseOrFunc a promise to be awaited, or a function returning a promise.
+ */
+export async function time<T>(promiseOrFunc: Main<T>): Promise<[T, number]> {
+  const startedLoading = + new Date();
+  const result = await promiseOrCall(promiseOrFunc);
+  const time = + new Date() - startedLoading;
+  return [result, time];
+}
 
 interface Options {
   slow?: CallbackFunc;
@@ -128,15 +138,9 @@ interface Options {
  * @param {number?} options.fastTime time until which the operation is considered fast. Default: 500
  * @return {any} return value of main function
  */
-function timedAsync<T>(promiseOrFunc: Main<T>, options: Options = {}): DelayedPromise<T> {
+export function timedAsync<T>(promiseOrFunc: Main<T>, options: Options = {}): DelayedPromise<T> {
   const promise = new DelayedPromise(promiseOrFunc, options.fastTime || FAST_LOAD_TIME);
   if (options.fast) promise.onFast(options.fast);
   if (options.slow) promise.after(options.slowTime || SLOW_LOAD_TIME, options.slow);
   return promise;
 }
-
-export {
-  DelayedPromise,
-  ensureDelay,
-  timedAsync,
-};

@@ -1,40 +1,33 @@
-import { isConstructorDeclaration } from 'typescript';
 /* eslint no-console: 0 */
-import { timedAsync, ensureDelay } from './index';
-
-const waitFor = (ms) => {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
-};
+import { timedAsync, ensureDelay, time, sleep } from './index';
 
 const someSlowTask = async () => {
-  await waitFor(550);
+  await sleep(550);
   return 1;
 };
 
 const someSlowTaskException = async () => {
-  await waitFor(550);
+  await sleep(550);
   throw new Error('expected error');
 };
 
 const someQuickTask = async () => {
-  await waitFor(200);
+  await sleep(200);
   return 1;
 };
 
 const someQuickTaskException = async () => {
-  await waitFor(200);
+  await sleep(200);
   throw new Error('expected error');
 };
 
 const someMediumTask = async () => {
-  await waitFor(300);
+  await sleep(300);
   return 1;
 };
 
 const someMediumTaskException = async () => {
-  await waitFor(300);
+  await sleep(300);
   throw new Error('expected error');
 };
 
@@ -99,9 +92,7 @@ function assertDeepEqual(a, b) {
   }
 }
 
-async function test () {
-  let testResult;
-  
+async function test () {  
   await testTimedAsync(someSlowTask, 'slow', {
     result: 1,
     wasError: false,
@@ -122,6 +113,8 @@ async function test () {
     wasSlow: false,
     wasFast: true,
   });
+
+  // TODO check if changing API is ok here
   
   await testTimedAsync(someQuickTaskException, 'quick exception', {
     result: null,
@@ -158,6 +151,11 @@ async function test () {
     .after(300, () => slowCallbackCalls++)
     .after(400, () => slowCallbackCalls++);
   assertEqual(slowCallbackCalls, 2);
+
+  // Test time() API
+  const [result, t] = await time(someQuickTask());
+  assertEqual(result, 1);
+  console.assert(t >= 200, `time did not return correct time: ${t}`);
 }
 
 test();
